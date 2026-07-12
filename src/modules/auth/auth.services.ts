@@ -1,32 +1,55 @@
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
-import { UserCreateI } from "./auth.interface";
+import { UserCreateI, UserLogin } from "./auth.interface";
+import jwt, { SignOptions } from "jsonwebtoken";
+import { jwtUtils } from "../../utils/jwt";
 
+const loginIntodb = async (payload: UserLogin) => {
+  const { email, password } = payload;
 
-const createUser = async (payload: UserCreateI) => {
-  const { name, email, password, profilePhoto, role } = payload;
-  const isUserExist = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
-  });
-  if (isUserExist) {
-    throw new Error("User with this email already exists");
-  }
+  const user = await prisma.user.findUnique({
+  where: {
+    email,
+  },
+});
 
-  const hassPassword=  bcrypt.hashSync(password,Number(config.bcrypt_salt_rounds));
-//   console.log(hassPassword)
+if (!user) {
+  throw new Error("User not found");
+}
 
-    const create = await prisma.user.create({
-        data: {
-            name,
-            email,
-            password: hassPassword,
-            role,
-        }
-    });
-    return create
+const matchedPassword = bcrypt.compareSync(password, user.password);
+
+if (!matchedPassword) {
+  throw new Error("Invalid password");
+}
+
+  const jwtPayload = {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  };
+
+  // const token = jwt.sign(
+  //   jwtPayload,
+  //   config.jwt_access_secret as string,
+  //   { expiresIn: config.jwt_access_expires_in  } as SignOptions
+  // );
+
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
+
+  const refreshToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in as SignOptions,
+  );
+  return { refreshToken, accessToken };
 };
 
-export const userServices = {createUser};
+export const userServices = {
+  loginIntodb,
+};

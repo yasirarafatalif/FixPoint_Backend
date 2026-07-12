@@ -6,3 +6,8 @@ export interface UserCreateI{
     role: Role,
     profilePhoto?: string
 }
+
+export interface UserLogin{
+    email: string,
+    password: string
+}
