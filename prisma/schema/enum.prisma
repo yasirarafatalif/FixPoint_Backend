@@ -1,10 +1,34 @@
-enum Role{
-    CUSMOTER
-    TECHNICIAN
-    ADMIN
+enum Role {
+  CUSTOMER
+  TECHNICIAN
+  ADMIN
 }
 
-enum UserStatus{
-    BAN
-    UNBAN
+enum UserStatus {
+  ACTIVE
+  BLOCKED
 }
+
+enum BookingStatus {
+  REQUESTED
+  ACCEPTED
+  DECLINED
+  PAID
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  STRIPE
+  SSLCOMMERZ
+}
+
+

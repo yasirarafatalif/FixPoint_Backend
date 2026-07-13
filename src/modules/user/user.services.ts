@@ -32,6 +32,7 @@ const createUser = async (payload: UserCreateI) => {
 };
 
 const getProfile = async (userId: string) => {
+  console.log(userId)
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
