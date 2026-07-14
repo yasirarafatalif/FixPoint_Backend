@@ -6,12 +6,13 @@ model TechnicianProfile {
 
     bio         String?
     experience  Int
-    hourlyRate  Float
+    // hourlyRate  Float
     isAvailable Boolean  @default(true)
     location    String?
     skills      String[]
 
-    // services Service[]
+    services Services[]
+    customerBookings Bookings[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

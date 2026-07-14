@@ -24,7 +24,7 @@ const login = cathasycn(
     });
     sendResponse(res, {
       success: true,
-      statusCode: StatusCodes.CREATED,
+      statusCode: StatusCodes.OK,
       message: "User Login successful",
       data: {accessToken, refreshToken},
     });

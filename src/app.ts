@@ -6,6 +6,8 @@ import { authRoute } from './modules/auth/auth.routes';
 import { userRoute } from './modules/user/user.routes';
 import config from './config';
 import { technicianRoute } from './modules/technician/technician.routes';
+import { serviceRoute } from './modules/service/service.routes';
+import { bookingRoute } from './modules/bookings/booking.routes';
 const app: Express = express();
 
 
@@ -22,6 +24,8 @@ app.use(cookieParser());
 app.use("/api/auth", authRoute)
 app.use("/api/auth", userRoute)
 app.use("/api/technicians", technicianRoute)
+app.use("/api/services", serviceRoute)
+app.use("/api/bookings", bookingRoute)
 
 
 app.get("/", (req: Request, res: Response) => {
