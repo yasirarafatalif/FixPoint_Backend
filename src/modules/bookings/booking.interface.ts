@@ -3,3 +3,9 @@ export interface BookingsI{
     bookingDate: Date,
     customerNote?: string
 }
+
+export interface id{
+    bookingId?: string,
+    userId?: string,
+    role?:string
+}

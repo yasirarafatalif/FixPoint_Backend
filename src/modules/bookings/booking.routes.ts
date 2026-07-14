@@ -7,6 +7,7 @@ const router = Router();
 
 router.post("/", auth(Role.CUSTOMER), bookingController.createBooking)
 router.get("/", auth(Role.CUSTOMER, Role.ADMIN), bookingController.findBooking)
+router.get("/:id", auth(Role.CUSTOMER, Role.ADMIN), bookingController.findSingleBooking)
 
 
 

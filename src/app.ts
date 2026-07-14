@@ -8,6 +8,7 @@ import config from './config';
 import { technicianRoute } from './modules/technician/technician.routes';
 import { serviceRoute } from './modules/service/service.routes';
 import { bookingRoute } from './modules/bookings/booking.routes';
+import globalErrorHandler from './middleware/globalErrorHandler';
 const app: Express = express();
 
 
@@ -31,5 +32,7 @@ app.use("/api/bookings", bookingRoute)
 app.get("/", (req: Request, res: Response) => {
     res.send("Server is running!");
 });
+
+app.use(globalErrorHandler)
 
 export default app;

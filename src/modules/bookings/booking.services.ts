@@ -28,17 +28,70 @@ const createBooking = async (payload: BookingsI, userId: string) => {
   return data;
 };
 
-const findBooking = async (userId: string) => {
-  const bookings = await prisma.bookings.findMany({
+const findBooking = async (userId: string, role: string) => {
+  if (role === "ADMIN") {
+    return await prisma.bookings.findMany({
+      include: {
+        customer: true,
+        service: true,
+        technician: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+  return await prisma.bookings.findMany({
     where: {
       customerId: userId,
     },
+    // include: {
+    //   service: true,
+    //   technician: true,
+    // },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
-
-  return bookings;
 };
+
+
+const findSingleBooking = async (bookingId: string, userId: string, role: string) => {
+  if (role === "ADMIN") {
+    return await prisma.bookings.findUnique({
+      where: {
+        id: bookingId,
+      },
+      include: {
+        customer: {
+            omit:{
+                password: true
+            }
+        },
+        service: true,
+        technician: true,
+        review: true,
+      },
+    });
+  }
+
+  return await prisma.bookings.findFirst({
+    where: {
+      id: bookingId,
+      customerId: userId,
+    },
+    include: {
+      service: true,
+      technician: true,
+      review: true,
+    },
+  });
+};
+
 
 export const bookingServices = {
   createBooking,
-  findBooking
+  findBooking,
+  findSingleBooking
 };

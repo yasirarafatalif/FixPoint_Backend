@@ -6,10 +6,9 @@ import { techniciansServices } from "./technician.services";
 import { JwtPayload } from "jsonwebtoken";
 
 const createTechnician = cathasycn(
-  async (req: Request, res: Response) => {
+  async (req: Request & { user?: JwtPayload }, res: Response) => {
     const user = req.user;
-    const result = await techniciansServices.createTechnician(
-      req.user as JwtPayload,
+    const result = await techniciansServices.createTechnician(user as JwtPayload,
       req.body
     );
 
@@ -22,6 +21,25 @@ const createTechnician = cathasycn(
   }
 );
 
+const getAllProfile = cathasycn(
+  async (req: Request & { user?: JwtPayload }, res: Response) => {
+    const user = req.user;
+
+    const data = await techniciansServices.allTechniciansProfile();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Profile Retrieved Successfully",
+      data,
+    });
+  }
+);
+
+
+
 export const techniciansController = {
   createTechnician,
+  getAllProfile
+
 };
