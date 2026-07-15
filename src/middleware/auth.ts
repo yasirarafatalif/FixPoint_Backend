@@ -1,10 +1,10 @@
 import { Role } from "./../../generated/prisma/enums";
 import { NextFunction, Request, Response } from "express";
-import { cathasycn } from "../utils/cathasycn";
 import { jwtUtils } from "../utils/jwt";
 import config from "../config";
 import { prisma } from "../lib/prisma";
 import { JwtPayload } from "jsonwebtoken";
+import { cathasync } from "../utils/cathasycn";
 declare global {
   namespace Express {
     interface Request {
@@ -18,7 +18,7 @@ declare global {
 }
 
 export const auth = (...roles: Role[]) => {
-  return cathasycn(async (req: Request, res: Response, next: NextFunction) => {
+  return cathasync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies.accessToken
       ? req.cookies.accessToken
       : req.headers.authorization

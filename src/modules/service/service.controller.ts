@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import { NextFunction, Request, Response } from "express";
-import { cathasycn } from "../../utils/cathasycn";
 import { sendResponse } from "../../utils/senRespone";
 import { serviceServices } from "./service.services";
+import { cathasync } from "../../utils/cathasycn";
 
-const createService = cathasycn(
+const createService = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
     const userId = req.user?.id;
@@ -20,10 +20,10 @@ const createService = cathasycn(
   },
 );
 
-const getService = cathasycn(
+const getService = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {},
 );
-const getSingleService = cathasycn(
+const getSingleService = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const data = await serviceServices.getSingleService(id as string);

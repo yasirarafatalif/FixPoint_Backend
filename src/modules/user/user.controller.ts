@@ -1,13 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { cathasycn } from "../../utils/cathasycn";
 import { sendResponse } from "../../utils/senRespone";
 import StatusCodes from "http-status-codes";
 import { userServices } from "./user.services";
-import jwt from "jsonwebtoken";
-import config from "../../config";
-import { jwtUtils } from "../../utils/jwt";
+import { cathasync } from "../../utils/cathasycn";
 
-const createUser = cathasycn(
+const createUser = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
 
@@ -21,7 +18,7 @@ const createUser = cathasycn(
   },
 );
 
-const getProfile = cathasycn(
+const getProfile = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id;
     const user = await userServices.getProfile(userId as string);

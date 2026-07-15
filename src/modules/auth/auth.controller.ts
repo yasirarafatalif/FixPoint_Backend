@@ -1,12 +1,12 @@
 
 import { NextFunction, Request, Response } from "express";
-import { cathasycn } from "../../utils/cathasycn";
 import { sendResponse } from "../../utils/senRespone";
 import StatusCodes from "http-status-codes";
 import { userServices } from "./auth.services";
+import { cathasync } from "../../utils/cathasycn";
 
 
-const login = cathasycn(
+const login = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body
     const {accessToken, refreshToken} = await userServices.loginIntodb(payload);

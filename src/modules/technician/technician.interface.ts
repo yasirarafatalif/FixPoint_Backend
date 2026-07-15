@@ -1,6 +1,7 @@
 export interface TechniciansI{
     skills?: string[],
     bio?: string,
-    experience:Number,
+    experience?:number,
     location?: string,
+    isAvailable?:boolean
 }

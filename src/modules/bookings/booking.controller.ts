@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { cathasycn } from "../../utils/cathasycn";
 import { sendResponse } from "../../utils/senRespone";
 import { StatusCodes } from "http-status-codes";
 import { bookingServices } from "./booking.services";
 import { JwtPayload } from "jsonwebtoken";
+import { cathasync } from "../../utils/cathasycn";
 
-const createBooking = cathasycn(
+const createBooking = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
     const userId= req.user?.id;
@@ -20,7 +20,7 @@ const createBooking = cathasycn(
     });
   },
 );
-const findBooking = cathasycn(
+const findBooking = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id;
     const role = req.user?.role;
@@ -36,7 +36,7 @@ const findBooking = cathasycn(
     });
   }
 );
-const findSingleBooking = cathasycn(
+const findSingleBooking = cathasync(
   async (req: Request, res: Response) => {
     const bookingId = req.params.id;
     const userId = req.user?.id ;
