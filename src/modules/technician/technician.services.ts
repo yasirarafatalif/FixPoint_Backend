@@ -1,7 +1,12 @@
 import { JwtPayload } from "jsonwebtoken";
 import { Role, BookingStatus } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
-import { TechniciansI, UpdateAvailabilityI, UpdateStatus } from "./technician.interface";
+import {
+  TechnicianFilters,
+  TechniciansI,
+  UpdateAvailabilityI,
+  UpdateStatus,
+} from "./technician.interface";
 
 const createTechnician = async (user: JwtPayload, payload: TechniciansI) => {
   const { experience, bio, location, skills } = payload;
@@ -23,29 +28,113 @@ const createTechnician = async (user: JwtPayload, payload: TechniciansI) => {
   return result;
 };
 
-const allTechniciansProfile = async () => {
-  const profile = await prisma.technicianProfile.findMany({
-    include: {
-      user: {
-        omit: {
-          password: true,
-          updateAt: true,
-          createdAt: true,
+const getAllTechnicians = async (query: TechnicianFilters) => {
+  const {
+    searchTerm,
+    location,
+    skills,
+    experience,
+    isAvailable,
+    page = "1",
+    limit = "10",
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = query;
+
+  const andConditions: any[] = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: [
+        {
+          user: {
+            name: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
         },
-        include: {
-          review: true,
+        {
+          bio: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  if (location) {
+    andConditions.push({
+      location: {
+        contains: location,
+        mode: "insensitive",
+      },
+    });
+  }
+
+  if (skills) {
+    andConditions.push({
+      skills: {
+        has: skills,
+      },
+    });
+  }
+
+  if (experience) {
+    andConditions.push({
+      experience: {
+        gte: Number(experience),
+      },
+    });
+  }
+
+  if (isAvailable !== undefined) {
+    andConditions.push({
+      isAvailable: isAvailable === "true",
+    });
+  }
+
+  const where = andConditions.length
+    ? {
+        AND: andConditions,
+      }
+    : {};
+
+  const data = await prisma.technicianProfile.findMany({
+    where,
+    omit: {
+      createdAt: true,
+      updatedAt: true,
+    },
+    include: {
+      services: {
+        omit: {
+          createdAt: true,
+          updatedAt: true,
         },
       },
     },
+    skip: (Number(page) - 1) * Number(limit),
+    take: Number(limit),
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
   });
 
-  if (!profile) {
-    throw new Error("Technician profile not found");
-  }
+  const total = await prisma.technicianProfile.count({
+    where,
+  });
 
-  return profile;
+  return {
+    meta: {
+      page: Number(page),
+      limit: Number(limit),
+      total,
+    },
+    data,
+  };
 };
-
 const myProfile = async (userId: string) => {
   const user = await prisma.technicianProfile.findUnique({
     where: {
@@ -140,16 +229,18 @@ const updateAvailability = async (
   });
 };
 
-const updateStatus = async (id: string, userId: string, payload:UpdateStatus) => {
-
-
+const updateStatus = async (
+  id: string,
+  userId: string,
+  payload: UpdateStatus,
+) => {
   const findTechnician = await prisma.technicianProfile.findUnique({
-    where:{
-      userId
-    }
-  })
-  if(!findTechnician){
-    throw new Error("Technicians not found")
+    where: {
+      userId,
+    },
+  });
+  if (!findTechnician) {
+    throw new Error("Technicians not found");
   }
   const findBokking = await prisma.bookings.findFirst({
     where: {
@@ -162,25 +253,24 @@ const updateStatus = async (id: string, userId: string, payload:UpdateStatus) =>
     throw new Error("This bookings not avilable");
   }
 
-  if (findBokking.status === "COMPLETED"){
+  if (findBokking.status === "COMPLETED") {
     throw new Error("This booking has already completed");
   }
 
   const updateBooking = await prisma.bookings.update({
-    where:{
-      id
+    where: {
+      id,
     },
-    data:payload
-  })
-  return updateBooking
-    
+    data: payload,
+  });
+  return updateBooking;
 };
 export const techniciansServices = {
   createTechnician,
-  allTechniciansProfile,
+  getAllTechnicians,
   myProfile,
   updateProfile,
   getBookig,
   updateAvailability,
-  updateStatus
+  updateStatus,
 };

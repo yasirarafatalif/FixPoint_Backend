@@ -21,17 +21,16 @@ const createTechnician = cathasync(
   }
 );
 
-const getAllProfile = cathasync(
-  async (req: Request & { user?: JwtPayload }, res: Response) => {
-    const user = req.user;
-
-    const data = await techniciansServices.allTechniciansProfile();
+const getAllTechnicians = cathasync(
+  async (req: Request, res: Response) => {
+    const result = await techniciansServices.getAllTechnicians(req.query);
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: "Profile Retrieved Successfully",
-      data,
+      message: "Technicians Retrieved Successfully",
+      meta: result.meta,
+      data: result.data,
     });
   }
 );
@@ -122,7 +121,7 @@ const updateBookingStatus = cathasync(
 
 export const techniciansController = {
   createTechnician,
-  getAllProfile,
+  getAllTechnicians,
   myProfile,
   updateProfile,
   getBooking,

@@ -16,3 +16,17 @@ export interface UpdateAvailabilityI {
 export interface UpdateStatus {
   status?: BookingStatus
 }
+
+export interface TechnicianFilters {
+  searchTerm?: string;
+  location?: string;
+  skills?: string;
+  experience?: string;
+  isAvailable?: string;
+
+  page?: string;
+  limit?: string;
+
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
