@@ -8,6 +8,9 @@ model Services {
 
     bookings Bookings[]
 
+    categoryId String
+    category   Category @relation(fields: [categoryId], references: [id])
+
     technicianId String
     technician   TechnicianProfile @relation(fields: [technicianId], references: [id], onDelete: Cascade)
     createdAt    DateTime          @default(now())

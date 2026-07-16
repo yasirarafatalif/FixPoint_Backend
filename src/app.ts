@@ -9,6 +9,8 @@ import { technicianRoute } from './modules/technician/technician.routes';
 import { serviceRoute } from './modules/service/service.routes';
 import { bookingRoute } from './modules/bookings/booking.routes';
 import globalErrorHandler from './middleware/globalErrorHandler';
+import { categoryRoute } from './modules/category/category.routes';
+import { adminRoute } from './modules/admin/admin.routes';
 const app: Express = express();
 
 
@@ -27,6 +29,8 @@ app.use("/api/auth", userRoute)
 app.use("/api/technicians", technicianRoute)
 app.use("/api/services", serviceRoute)
 app.use("/api/bookings", bookingRoute)
+app.use("/api/categories", categoryRoute)
+app.use("/api/admin", adminRoute)
 
 
 app.get("/", (req: Request, res: Response) => {
