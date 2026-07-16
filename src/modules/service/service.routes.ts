@@ -6,7 +6,7 @@ import { serviceController } from './service.controller';
 const router = Router();
 
 router.post("/", auth(Role.TECHNICIAN), serviceController.createService);
-router.get("/", serviceController.getService);
+router.get("/", serviceController.getAllServices);
 router.get("/:id", auth(Role.TECHNICIAN,Role.ADMIN,Role.CUSTOMER), serviceController.getSingleService);
 
 

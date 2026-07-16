@@ -7,7 +7,7 @@ const router = Router();
 
 router.post("/", auth(Role.TECHNICIAN), techniciansController.createTechnician)
 router.get("/",  techniciansController.getAllProfile)
-router.get("/profile", auth(Role.TECHNICIAN, Role.ADMIN), techniciansController.myProfile)
+router.get("/profile", auth(Role.TECHNICIAN), techniciansController.myProfile)
 router.patch("/profile", auth(Role.TECHNICIAN,), techniciansController.updateProfile)
 router.get("/bookings", auth(Role.TECHNICIAN,), techniciansController.getBooking)
 router.patch("/bookings/:id", auth(Role.TECHNICIAN,), techniciansController.updateBookingStatus)

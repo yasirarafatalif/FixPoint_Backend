@@ -20,8 +20,18 @@ const createService = cathasync(
   },
 );
 
-const getService = cathasync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+const getAllServices = cathasync(
+  async (req: Request, res: Response) => {
+    const result = await serviceServices.getAllServices(req.query);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Services Retrieved Successfully",
+      meta: result.meta,
+      data: result.data,
+    });
+  }
 );
 const getSingleService = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -38,6 +48,6 @@ const getSingleService = cathasync(
 
 export const serviceController = {
   createService,
-  getService,
+  getAllServices,
   getSingleService,
 };

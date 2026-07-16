@@ -54,7 +54,7 @@ const myProfile = async (userId: string) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("Technician not found");
   }
 
   return user;
@@ -170,9 +170,7 @@ const updateStatus = async (id: string, userId: string, payload:UpdateStatus) =>
     where:{
       id
     },
-    data:{
-      status: payload.status
-    }
+    data:payload
   })
   return updateBooking
     

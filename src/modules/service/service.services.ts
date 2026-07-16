@@ -1,6 +1,6 @@
 
 import { prisma } from "../../lib/prisma";
-import { ServicesI } from "./service.interface";
+import { ServiceFilters, ServicesI } from "./service.interface";
 
 
 const createService = async (payload: ServicesI, userId: string) => {
@@ -48,12 +48,79 @@ const getSingleService =async(id:string)=>{
     return result;
 
 }
-const getService =async()=>{
+const getAllServices = async (query: ServiceFilters) => {
+  const {
+    type,
+    location,
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = query;
 
-}
+  const andConditions: any[] = [];
+
+  if (type) {
+    andConditions.push({
+      type: {
+        equals: type,
+        mode: "insensitive",
+      },
+    });
+  }
+
+  if (location) {
+    andConditions.push({
+      technician: {
+        location: {
+          contains: location,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+
+
+  const where = andConditions.length ? { AND: andConditions } : {};
+
+  const data = await prisma.services.findMany({
+    where,
+    omit:{
+      createdAt:true,
+      updatedAt: true
+
+    },
+    include: {
+      technician: {
+        omit:{
+          createdAt: true,
+          updatedAt: true
+        }
+      },
+    },
+    skip: (Number(page) - 1) * Number(limit),
+    take: Number(limit),
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+  });
+
+  const total = await prisma.services.count({
+    where,
+  });
+
+  return {
+    meta: {
+      page: Number(page),
+      limit: Number(limit),
+      total,
+    },
+    data,
+  };
+};
 export const serviceServices={
     createService,
     getSingleService,
-    getService
+    getAllServices
 
 }
