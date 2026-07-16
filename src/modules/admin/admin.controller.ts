@@ -17,6 +17,20 @@ const createCategory = cathasync(
   }
 );
 
+const getAllCategories = cathasync(
+  async (req: Request, res: Response) => {
+    const data = await categoryServices.getAllCategories();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Categories Retrieved Successfully",
+      data,
+    });
+  }
+);
+
 export const categoryController ={
-    createCategory
+    createCategory,
+    getAllCategories,
 }
