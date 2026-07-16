@@ -28,6 +28,50 @@ const createTechnician = async (user: JwtPayload, payload: TechniciansI) => {
   return result;
 };
 
+const getSingleTechnician = async (id: string) => {
+
+  const technician = await prisma.technicianProfile.findUnique({
+    where: {
+      id,
+    },
+    omit: {
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!technician) {
+    throw new Error("Technician not found");
+  }
+
+  const bookings = await prisma.bookings.findMany({
+    where: {
+      technicianId: technician.id,
+    },
+    select: {
+      review: {
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          customer: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const reviews = bookings.flatMap((booking) => booking.review);
+  return {
+    ...technician,
+    bookings,
+  };
+};
+
 const getAllTechnicians = async (query: TechnicianFilters) => {
   const {
     searchTerm,
@@ -273,4 +317,5 @@ export const techniciansServices = {
   getBookig,
   updateAvailability,
   updateStatus,
+  getSingleTechnician,
 };

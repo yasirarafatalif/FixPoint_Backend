@@ -36,6 +36,22 @@ const getAllTechnicians = cathasync(
 );
 
 
+const getSingleTechnician = cathasync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const data = await techniciansServices.getSingleTechnician(id as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Technician Retrieved Successfully",
+      data,
+    });
+  }
+);
+
+
 const myProfile= cathasync(
   async(req: Request, res: Response, next:NextFunction)=>{
     const userId = req.user?.id;
@@ -126,6 +142,7 @@ export const techniciansController = {
   updateProfile,
   getBooking,
   updateAvailability,
-  updateBookingStatus
+  updateBookingStatus,
+  getSingleTechnician
 
 };
