@@ -19,10 +19,8 @@ const createCategory = async (payload: CategoryI) => {
     },
   });
 
-
   return category;
 };
-
 
 const getAllCategories = async () => {
   const categories = await prisma.category.findMany({
@@ -34,7 +32,30 @@ const getAllCategories = async () => {
   return categories;
 };
 
-export const categoryServices ={
-    createCategory,
-    getAllCategories,
-}
+const getAllBookings = async () => {
+  const bookings = await prisma.bookings.findMany({
+    // include: {
+    //   technician: {
+    //     omit: {
+    //       createdAt: true,
+    //       updatedAt: true,
+    //     },
+    //   },
+    // },
+    omit: {
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return bookings;
+};
+
+export const adminServices = {
+  createCategory,
+  getAllCategories,
+  getAllBookings,
+};
