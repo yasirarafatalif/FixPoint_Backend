@@ -81,12 +81,52 @@ const getBooking= cathasync(
   }
 )
 
+const updateAvailability = cathasync(
+  async (req: Request & { user?: JwtPayload}, res: Response) => {
+    const availabilityId = req.params.id;
+    const userId = req.user?.id;
+
+    const data = await techniciansServices.updateAvailability(
+      req.body,
+      userId as string
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Availability Updated Successfully",
+      data,
+    });
+  }
+);
+const updateBookingStatus = cathasync(
+  async (req: Request & { user?: JwtPayload}, res: Response) => {
+    const id = req.params.id;
+    const userId = req.user?.id;
+
+    const data = await techniciansServices.updateStatus(
+      id as string ,
+      userId as string,
+      req.body
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Bookings Updated Successfully",
+      data,
+    });
+  }
+);
+
 
 export const techniciansController = {
   createTechnician,
   getAllProfile,
   myProfile,
   updateProfile,
-  getBooking
+  getBooking,
+  updateAvailability,
+  updateBookingStatus
 
 };

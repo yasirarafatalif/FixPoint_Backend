@@ -1,7 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
-import { Role } from "../../../generated/prisma/client";
+import { Role, BookingStatus } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
-import { TechniciansI } from "./technician.interface";
+import { TechniciansI, UpdateAvailabilityI, UpdateStatus } from "./technician.interface";
 
 const createTechnician = async (user: JwtPayload, payload: TechniciansI) => {
   const { experience, bio, location, skills } = payload;
@@ -83,30 +83,106 @@ const updateProfile = async (payload: TechniciansI, userId: string) => {
   return data;
 };
 
-const getBookig = async(userId: string)=>{
+const getBookig = async (userId: string) => {
   const findTechnican = await prisma.technicianProfile.findUnique({
+    where: {
+      userId,
+    },
+  });
+
+  if (!findTechnican) {
+    throw new Error("Not Found");
+  }
+
+  const findBooking = await prisma.bookings.findMany({
+    where: {
+      technicianId: findTechnican.id,
+    },
+  });
+
+  return findBooking;
+};
+
+const updateAvailability = async (
+  payload: UpdateAvailabilityI,
+  userId: string,
+) => {
+  const technician = await prisma.technicianProfile.findUnique({
+    where: {
+      userId,
+    },
+  });
+
+  if (!technician) {
+    throw new Error("Technician profile not found");
+  }
+
+  const existingAvailability = await prisma.availability.findFirst({
+    where: {
+      technicianId: technician.id,
+    },
+  });
+
+  if (existingAvailability) {
+    return await prisma.availability.update({
+      where: {
+        id: existingAvailability.id,
+      },
+      data: payload,
+    });
+  }
+
+  return await prisma.availability.create({
+    data: {
+      ...payload,
+      technicianId: technician.id,
+    },
+  });
+};
+
+const updateStatus = async (id: string, userId: string, payload:UpdateStatus) => {
+
+
+  const findTechnician = await prisma.technicianProfile.findUnique({
     where:{
       userId
     }
   })
+  if(!findTechnician){
+    throw new Error("Technicians not found")
+  }
+  const findBokking = await prisma.bookings.findFirst({
+    where: {
+      id,
+      technicianId: findTechnician.id,
+    },
+  });
 
-  if(!findTechnican){
-    throw new Error("Not Found")
+  if (!findBokking) {
+    throw new Error("This bookings not avilable");
   }
 
-  const findBooking = await prisma.bookings.findMany({
+  if (findBokking.status === "COMPLETED"){
+    throw new Error("This booking has already completed");
+  }
+
+  const updateBooking = await prisma.bookings.update({
     where:{
-      technicianId : findTechnican.id
+      id
+    },
+    data:{
+      status: payload.status
     }
   })
-
-  return findBooking;
-}
-
+  return updateBooking
+    
+};
 export const techniciansServices = {
   createTechnician,
   allTechniciansProfile,
   myProfile,
   updateProfile,
-  getBookig
+  getBookig,
+  updateAvailability,
+  updateStatus
 };

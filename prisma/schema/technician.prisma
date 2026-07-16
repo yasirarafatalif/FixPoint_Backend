@@ -10,6 +10,8 @@ model TechnicianProfile {
     isAvailable Boolean  @default(true)
     location    String?
     skills      String[]
+    
+    availability Availability[]
 
     services Services[]
     customerBookings Bookings[]
