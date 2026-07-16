@@ -43,8 +43,40 @@ const getAllBookings = cathasync(
   }
 );
 
+
+const updateUserStatus = cathasync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const data = await adminServices.updateUserStatus(id as string, req.body);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "User Status Updated Successfully",
+      data,
+    });
+  }
+);
+
+const getAllUsers = cathasync(
+  async (req: Request, res: Response) => {
+    const data = await adminServices.getAllUsers();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Users Retrieved Successfully",
+      data,
+    });
+  }
+);
+
+
 export const adminController ={
     createCategory,
     getAllCategories,
     getAllBookings,
+    updateUserStatus,
+    getAllUsers
 }

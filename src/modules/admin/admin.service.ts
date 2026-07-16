@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { CategoryI } from "./admin.interface";
+import { CategoryI, UpdateUserStatus } from "./admin.interface";
 
 const createCategory = async (payload: CategoryI) => {
   const isExist = await prisma.category.findUnique({
@@ -54,8 +54,51 @@ const getAllBookings = async () => {
   return bookings;
 };
 
+
+const updateUserStatus = async (
+  id: string,
+  payload: UpdateUserStatus
+) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      isActive: payload.isActive,
+    },
+  });
+
+  return updatedUser;
+};
+
+const getAllUsers = async () => {
+  const users = await prisma.user.findMany({
+    omit: {
+      password: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return users;
+};
+
+
 export const adminServices = {
   createCategory,
   getAllCategories,
   getAllBookings,
+  updateUserStatus,
+  getAllUsers
 };
