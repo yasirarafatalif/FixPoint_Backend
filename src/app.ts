@@ -12,6 +12,7 @@ import globalErrorHandler from './middleware/globalErrorHandler';
 import { categoryRoute } from './modules/category/category.routes';
 import { adminRoute } from './modules/admin/admin.routes';
 import { paymentRoute } from './modules/payment/payment.routes';
+import { reviewRoute } from './modules/reviews/review.routes';
 const app: Express = express();
 
 
@@ -33,6 +34,7 @@ app.use("/api/bookings", bookingRoute)
 app.use("/api/categories", categoryRoute)
 app.use("/api/admin", adminRoute)
 app.use("/api/payments", paymentRoute)
+app.use("/api/reviews", reviewRoute)
 
 
 app.get("/", (req: Request, res: Response) => {
