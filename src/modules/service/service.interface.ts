@@ -3,7 +3,8 @@ export interface ServicesI {
     discription: string,
     title: string,
     duration: Number,
-    price: Number
+    price: Number,
+    categoryId: string
 }
 
 export interface ServiceFilters {

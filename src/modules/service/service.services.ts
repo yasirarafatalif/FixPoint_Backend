@@ -4,7 +4,7 @@ import { ServiceFilters, ServicesI } from "./service.interface";
 
 
 const createService = async (payload: ServicesI, userId: string) => {
-  const { title, discription, price, duration } = payload;
+  const { title, discription, price, duration ,categoryId} = payload;
   const priceNumber = typeof price === "number" ? price : Number(price);
   const durationNumber = typeof duration === "number" ? duration : Number(duration);
 
@@ -18,12 +18,16 @@ const createService = async (payload: ServicesI, userId: string) => {
     throw new Error("Technician profile not found");
   }
 
+  //find category and add 
+
+
   const result = await prisma.services.create({
     data: {
       title,
       discription,
       price: priceNumber,
       duration: durationNumber,
+      categoryId,
       technicianId: findTechnician.id,
     },
   });
