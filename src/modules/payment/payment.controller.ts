@@ -43,8 +43,25 @@ const getMyPayments = cathasync(async (req: Request, res: Response, next: NextFu
   });
 });
 
+
+const getSinglePayment = cathasync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+  console.log(id)
+
+  const result = await paymentService.getSinglePayment(id as string, userId as string);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Payment details retrieved successfully",
+    data: result,
+  });
+});
+
 export const paymentController = {
   createPayment,
   successPayment,
-  getMyPayments
+  getMyPayments,
+  getSinglePayment
 };

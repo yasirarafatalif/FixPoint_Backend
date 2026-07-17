@@ -181,8 +181,44 @@ const getMyPayments = async (userId: string) => {
   return payments;
 };
 
+
+
+const getSinglePayment = async (paymentId: string, userId: string) => {
+  const payment = await prisma.payment.findUnique({
+    where: {
+      id: paymentId,
+      booking: {
+        customerId: userId,
+      },
+    },
+    include: {
+      booking: {
+        include: {
+          service: {
+            select: {
+              id: true,
+              title: true,
+              discription: true,
+              price: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    throw new Error("Payment not found");
+  }
+
+  return payment;
+};
+
+
+
 export const paymentService = {
   initPayment,
   successPayment,
   getMyPayments,
+  getSinglePayment
 };
