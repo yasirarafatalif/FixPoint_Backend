@@ -106,7 +106,7 @@ const successPayment = async (payload: any) => {
   const validation = await sslcz.validate({
     val_id,
   });
-//   console.log(validation);
+  //   console.log(validation);
 
   if (validation.status !== "VALID") {
     throw new Error("Payment Error");
@@ -123,24 +123,24 @@ const successPayment = async (payload: any) => {
   }
 
   await prisma.$transaction([
-  prisma.payment.update({
-    where: {
-      transactionId: tran_id,
-    },
-    data: {
-      status: "SUCCESS",
-    },
-  }),
+    prisma.payment.update({
+      where: {
+        transactionId: tran_id,
+      },
+      data: {
+        status: "SUCCESS",
+      },
+    }),
 
-//   prisma.bookings.update({
-//     where: {
-//       id: payment.bookingId,
-//     },
-//     data: {
-//       paymentStatus: "PAID",
-//     },
-//   }),
-]);
+    //   prisma.bookings.update({
+    //     where: {
+    //       id: payment.bookingId,
+    //     },
+    //     data: {
+    //       paymentStatus: "PAID",
+    //     },
+    //   }),
+  ]);
 
   // 1. SSLCommerz Validation API call
   //   const verifyResponse = await axios.get(
@@ -161,7 +161,28 @@ const successPayment = async (payload: any) => {
   //   return {verifyData,validation};
   return { validation };
 };
+
+const getMyPayments = async (userId: string) => {
+ const payments = await prisma.payment.findMany({
+  where: {
+    booking: {
+      customerId: userId,
+    },
+  },
+  omit: {
+    createdAt: true,
+    updatedAt: true,
+  },
+  orderBy: {
+    createdAt: "desc",
+  },
+});
+
+  return payments;
+};
+
 export const paymentService = {
   initPayment,
   successPayment,
+  getMyPayments,
 };

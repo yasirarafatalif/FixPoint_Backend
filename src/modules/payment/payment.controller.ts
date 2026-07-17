@@ -29,7 +29,22 @@ const successPayment = cathasync(
   },
 );
 
+
+const getMyPayments = cathasync(async (req: Request, res: Response, next: NextFunction)=> {
+  const userId = req.user?.id;
+
+  const result = await paymentService.getMyPayments(userId as string);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Payment history retrieved successfully",
+    data: result,
+  });
+});
+
 export const paymentController = {
   createPayment,
   successPayment,
+  getMyPayments
 };
