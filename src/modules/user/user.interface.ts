@@ -1,8 +1,10 @@
-import { Role } from './../../../generated/prisma/enums';
+import { LogInRole } from './../../../generated/prisma/enums';
 export interface UserCreateI{
     name : string,
     email: string,
     password: string,
-    role: Role,
-    profilePhoto?: string
+    role: LogInRole,
+    profileImage?: string
+    phone?: string,
+    address?: string
 }

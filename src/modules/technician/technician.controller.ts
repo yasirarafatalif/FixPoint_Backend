@@ -82,7 +82,7 @@ const updateProfile= cathasync(
   }
 )
 const getBooking= cathasync(
-  async(req: Request , res: Response, next:NextFunction)=>{
+  async (req: Request , res: Response, next:NextFunction)=>{
     const userId = req.user?.id;
     const data = await techniciansServices.getBookig(userId as string);
     sendResponse(res, {

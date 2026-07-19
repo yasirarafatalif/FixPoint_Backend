@@ -8,7 +8,7 @@ model Payment {
   transactionId String @unique
   validationId String?
   gatewayTransactionId String?
-  gateway String @default("SSLCOMMERZ")
+  gateway PaymentProvider @default(SSLCOMMERZ)
   paymentMethod String? 
   currency String @default("BDT")
   paidAt DateTime?

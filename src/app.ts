@@ -28,7 +28,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoute)
 app.use("/api/auth", userRoute)
-app.use("/api/technicians", technicianRoute)
+app.use("/api/technician", technicianRoute)
 app.use("/api/services", serviceRoute)
 app.use("/api/bookings", bookingRoute)
 app.use("/api/categories", categoryRoute)

@@ -7,6 +7,8 @@ import {
   UpdateAvailabilityI,
   UpdateStatus,
 } from "./technician.interface";
+import AppError from "../../utils/appError";
+import { StatusCodes } from "http-status-codes";
 
 const createTechnician = async (user: JwtPayload, payload: TechniciansI) => {
   const { experience, bio, location, skills } = payload;
@@ -15,21 +17,32 @@ const createTechnician = async (user: JwtPayload, payload: TechniciansI) => {
     throw new Error("Only technicians can create a technician profile.");
   }
 
-  const result = await prisma.technicianProfile.create({
-    data: {
-      experience: Number(experience),
-      bio,
-      location,
-      skills,
-      userId: user.id,
-    },
+  const data = await prisma.$transaction(async (tx) => {
+    const finUser = await tx.technicianProfile.findUnique({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (finUser) {
+      throw new Error("Already exists");
+    }
+
+    return await tx.technicianProfile.create({
+      data: {
+        experience: Number(experience),
+        bio,
+        location,
+        skills,
+        userId: user.id,
+      },
+    });
   });
 
-  return result;
+  return data;
 };
 
 const getSingleTechnician = async (id: string) => {
-
   const technician = await prisma.technicianProfile.findUnique({
     where: {
       id,
@@ -41,7 +54,7 @@ const getSingleTechnician = async (id: string) => {
   });
 
   if (!technician) {
-    throw new Error("Technician not found");
+    throw new AppError(StatusCodes.NOT_FOUND, "Technician not found");
   }
 
   const bookings = await prisma.bookings.findMany({
@@ -65,10 +78,11 @@ const getSingleTechnician = async (id: string) => {
     },
   });
 
-  const reviews = bookings.flatMap((booking) => booking.review);
+  const reviews = bookings.map((booking) => booking.review).filter(Boolean);
+
   return {
     ...technician,
-    bookings,
+    reviews,
   };
 };
 
@@ -224,7 +238,7 @@ const getBookig = async (userId: string) => {
   });
 
   if (!findTechnican) {
-    throw new Error("Not Found");
+    throw new AppError(StatusCodes.NOT_FOUND, "Technician Not Found");
   }
 
   const findBooking = await prisma.bookings.findMany({
@@ -233,6 +247,13 @@ const getBookig = async (userId: string) => {
     },
   });
 
+  if (findBooking.length === 0) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "No bookings found for this technician.",
+    );
+  }
+
   return findBooking;
 };
 
@@ -240,37 +261,41 @@ const updateAvailability = async (
   payload: UpdateAvailabilityI,
   userId: string,
 ) => {
-  const technician = await prisma.technicianProfile.findUnique({
-    where: {
-      userId,
-    },
-  });
-
-  if (!technician) {
-    throw new Error("Technician profile not found");
-  }
-
-  const existingAvailability = await prisma.availability.findFirst({
-    where: {
-      technicianId: technician.id,
-    },
-  });
-
-  if (existingAvailability) {
-    return await prisma.availability.update({
+  const data = await prisma.$transaction(async (tx) => {
+    const technician = await tx.technicianProfile.findUnique({
       where: {
-        id: existingAvailability.id,
+        userId,
       },
-      data: payload,
     });
-  }
 
-  return await prisma.availability.create({
-    data: {
-      ...payload,
-      technicianId: technician.id,
-    },
+    if (!technician) {
+      throw new Error("Technician profile not found");
+    }
+
+    const existingAvailability = await tx.availability.findFirst({
+      where: {
+        technicianId: technician.id,
+      },
+    });
+
+    if (existingAvailability) {
+      return await tx.availability.update({
+        where: {
+          id: existingAvailability.id,
+        },
+        data: payload,
+      });
+    }
+
+    return await tx.availability.create({
+      data: {
+        ...payload,
+        technicianId: technician.id,
+      },
+    });
   });
+
+  return data;
 };
 
 const updateStatus = async (
@@ -278,36 +303,57 @@ const updateStatus = async (
   userId: string,
   payload: UpdateStatus,
 ) => {
-  const findTechnician = await prisma.technicianProfile.findUnique({
-    where: {
-      userId,
-    },
-  });
-  if (!findTechnician) {
-    throw new Error("Technicians not found");
-  }
-  const findBokking = await prisma.bookings.findFirst({
-    where: {
-      id,
-      technicianId: findTechnician.id,
-    },
-  });
+  const data = await prisma.$transaction(async (tx) => {
+    const findTechnician = await tx.technicianProfile.findUnique({
+      where: {
+        userId,
+      },
+    });
+    if (!findTechnician) {
+      throw new AppError(StatusCodes.NOT_FOUND, "Technicians not found");
+    }
+    if (!findTechnician.isAvailable) {
+      throw new AppError(StatusCodes.NOT_FOUND, "Technicians not available");
+    }
+    const findBokking = await tx.bookings.findFirst({
+      where: {
+        id,
+        technicianId: findTechnician.id,
+      },
+    });
 
-  if (!findBokking) {
-    throw new Error("This bookings not avilable");
-  }
+    if (!findBokking) {
+      throw new AppError(StatusCodes.NOT_FOUND, "This bookings not avilable");
+    }
 
-  if (findBokking.status === "COMPLETED") {
-    throw new Error("This booking has already completed");
-  }
+    if (findBokking.status === BookingStatus.COMPLETED) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        "This booking has already been completed.",
+      );
+    }
 
-  const updateBooking = await prisma.bookings.update({
-    where: {
-      id,
-    },
-    data: payload,
+    if (
+      findBokking.status !== BookingStatus.REQUESTED &&
+      payload.status === BookingStatus.ACCEPTED
+    ) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        "Only requested bookings can be accepted.",
+      );
+    }
+    const result = await tx.bookings.update({
+      where: {
+        id,
+      },
+      data: {
+        status: payload.status,
+        updatedAt: new Date()
+      },
+    });
+    return result;
   });
-  return updateBooking;
+  return data;
 };
 export const techniciansServices = {
   createTechnician,

@@ -1,6 +1,6 @@
 export interface ServicesI {
     bio?: string,
-    discription: string,
+    description: string,
     title: string,
     duration: Number,
     price: Number,

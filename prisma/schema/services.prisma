@@ -1,15 +1,16 @@
 model Services {
     id          String @id @default(uuid())
     title       String @db.VarChar(255)
-    discription String
+    description String
 
     price    Float
     duration Int
 
     bookings Bookings[]
+    isActive Boolean    @default(true)
 
-    categoryId String?
-    category   Category? @relation(fields: [categoryId], references: [id])
+    categoryId String
+    category   Category @relation(fields: [categoryId], references: [id])
 
     technicianId String
     technician   TechnicianProfile @relation(fields: [technicianId], references: [id], onDelete: Cascade)

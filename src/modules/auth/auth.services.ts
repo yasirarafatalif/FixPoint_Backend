@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { UserCreateI, UserLogin } from "./auth.interface";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { jwtUtils } from "../../utils/jwt";
+import AppError from "../../utils/appError";
+import { StatusCodes } from "http-status-codes";
 
 const loginIntodb = async (payload: UserLogin) => {
   const { email, password } = payload;
@@ -15,13 +17,13 @@ const loginIntodb = async (payload: UserLogin) => {
 });
 
 if (!user) {
-  throw new Error("User not found");
+  throw new AppError(StatusCodes.NOT_FOUND,"User not found");
 }
 
 const matchedPassword = bcrypt.compareSync(password, user.password);
 
 if (!matchedPassword) {
-  throw new Error("Invalid password");
+  throw new AppError(StatusCodes.BAD_REQUEST,"Invalid password");
 }
 
   const jwtPayload = {

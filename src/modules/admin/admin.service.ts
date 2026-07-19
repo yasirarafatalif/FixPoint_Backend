@@ -74,8 +74,11 @@ const updateUserStatus = async (
       id,
     },
     data: {
-      isActive: payload.isActive,
+      status: payload.status,
     },
+    omit:{
+      password:true
+    }
   });
 
   return updatedUser;

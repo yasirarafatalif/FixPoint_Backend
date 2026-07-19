@@ -7,7 +7,6 @@ import { cathasync } from "../../utils/cathasycn";
 const createUser = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-
     const data = await userServices.createUser(payload);
     sendResponse(res, {
       success: true,

@@ -3,10 +3,19 @@ enum Role {
   TECHNICIAN
   ADMIN
 }
+enum LogInRole {
+  CUSTOMER
+  TECHNICIAN
+}
 
 enum UserStatus {
   ACTIVE
   BLOCKED
+}
+
+enum TechnicianBookingStatus {
+  AVAILABLE
+  BOOKED
 }
 
 enum BookingStatus {
