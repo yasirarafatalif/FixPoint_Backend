@@ -3,9 +3,10 @@ import { NextFunction, Request, Response } from "express";
 import { cathasync } from "../../utils/cathasycn";
 import { paymentService } from "./payment.service";
 import { StatusCodes } from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
 
 const createPayment = cathasync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request  & { user?: JwtPayload } , res: Response, next: NextFunction) => {
     const userId= req.user?.id;
     const data = await paymentService.initPayment(req.body,userId as string);
     sendResponse(res, {
@@ -30,7 +31,7 @@ const successPayment = cathasync(
 );
 
 
-const getMyPayments = cathasync(async (req: Request, res: Response, next: NextFunction)=> {
+const getMyPayments = cathasync(async (req: Request  & { user?: JwtPayload }, res: Response, next: NextFunction)=> {
   const userId = req.user?.id;
 
   const result = await paymentService.getMyPayments(userId as string);
@@ -44,7 +45,7 @@ const getMyPayments = cathasync(async (req: Request, res: Response, next: NextFu
 });
 
 
-const getSinglePayment = cathasync(async (req: Request, res: Response, next: NextFunction) => {
+const getSinglePayment = cathasync(async (req: Request  & { user?: JwtPayload }, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const userId = req.user?.id;
   console.log(id)

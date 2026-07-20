@@ -145,60 +145,72 @@ const initPayment = async (payload: CustomerI, userId: string) => {
 const successPayment = async (payload: any) => {
   const { val_id, tran_id } = payload;
 
-  const data = await prisma.$transaction(async (tx) => {
-    const validation = await sslcz.validate({
-      val_id,
-    });
-
-    if (validation.status !== "VALID") {
-      throw new Error("Payment Error");
+  const verifyResponse = await axios.get(
+    "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php",
+    {
+      params: {
+        val_id,
+        store_id: config.ssl_store_id,
+        store_passwd: config.ssl_store_password,
+        format: "json",
+      },
     }
+  );
 
-    const payment = await prisma.payment.findUnique({
+  const verifyData = verifyResponse.data;
+
+  if (verifyData.status !== "VALID") {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Payment validation failed."
+    );
+  }
+
+  const payment = await prisma.payment.findUnique({
+    where: {
+      transactionId: tran_id,
+    },
+  });
+
+  if (!payment) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "Payment not found."
+    );
+  }
+
+  await prisma.$transaction([
+    prisma.payment.update({
       where: {
         transactionId: tran_id,
       },
-    });
+      data: {
+        status: PaymentStatus.PAID,
+        validationId: verifyData.val_id,
+        gatewayTransactionId: verifyData.bank_tran_id,
+        paymentMethod: verifyData.card_type,
+        cardType: verifyData.card_type,
+        cardIssuer: verifyData.card_issuer,
+        cardBrand: verifyData.card_brand,
+        paidAt: new Date(),
+      },
+    }),
 
-    if (!payment) {
-      throw new Error("Payment not found");
-    }
+    prisma.bookings.update({
+      where: {
+        id: payment.bookingId,
+      },
+      data: {
+        paymentStatus: PaymentStatus.PAID,
+        status: BookingStatus.IN_PROGRESS
+      },
+    }),
+  ]);
 
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: {
-          transactionId: tran_id,
-        },
-        data: {
-          status: PaymentStatus.PAID,
-          validationId: val_id,
-        //  gatewayTransactionId:
-        
-        },
-      }),
-    ]);
-  });
-
-  return data;
-
-  // 1. SSLCommerz Validation API call
-  //   const verifyResponse = await axios.get(
-  //     "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php",
-  //     {
-  //       params: {
-  //         val_id,
-  //         store_id: config.ssl_store_id,
-  //         store_passwd: config.ssl_store_password,
-  //         format: "json",
-  //       },
-  //     },
-  //   );
-
-  //   const verifyData = verifyResponse.data;
-  //   console.log(verifyData)
-
-  //   return {verifyData,validation};
-  // return { validation };
+  return {
+    success: true,
+    message: "Payment verified successfully.",
+  };
 };
 
 const getMyPayments = async (userId: string) => {
