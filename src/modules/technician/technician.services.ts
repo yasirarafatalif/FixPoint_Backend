@@ -51,6 +51,9 @@ const getSingleTechnician = async (id: string) => {
       createdAt: true,
       updatedAt: true,
     },
+    include:{
+      services: true
+    }
   });
 
   if (!technician) {
