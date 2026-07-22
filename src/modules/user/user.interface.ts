@@ -8,3 +8,10 @@ export interface UserCreateI{
     phone?: string,
     address?: string
 }
+
+export interface IManageProfile {
+  name?:string,
+  address?: string,
+  profilePhoto?: string,
+  phone?: string
+}

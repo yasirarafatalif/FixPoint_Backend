@@ -7,6 +7,7 @@ const router = Router();
 
 router.post("/register", userController.createUser)
 router.get("/me", auth(Role.CUSTOMER, Role.ADMIN, Role.TECHNICIAN), userController.getProfile)
+router.patch("/manege-profile", auth(Role.CUSTOMER, Role.ADMIN, Role.TECHNICIAN), userController.manageProfile)
 
 
 

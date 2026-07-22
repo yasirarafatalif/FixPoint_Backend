@@ -1,8 +1,10 @@
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
-import { UserCreateI } from "./user.interface";
+import { IManageProfile, UserCreateI } from "./user.interface";
 import { LogInRole } from "../../../generated/prisma/client";
+import AppError from "../../utils/appError";
+import { StatusCodes } from "http-status-codes";
 
 const createUser = async (payload: UserCreateI) => {
   const { name, email, password, profileImage, role, phone, address } = payload;
@@ -61,7 +63,35 @@ const getProfile = async (userId: string) => {
   return user;
 };
 
+const manageProfile = async (
+  id: string,
+  payload:IManageProfile
+) => {
+  const technician = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!technician) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Technician not found");
+  }
+
+  const updatedProfile = await prisma.user.update({
+    where:{id},
+    data:{
+      ...payload,
+      updateAt: new Date()
+    },
+    omit:{
+      password: true
+
+    }
+  })
+
+  return updatedProfile;
+};
+
 export const userServices = {
   createUser,
   getProfile,
+  manageProfile
 };

@@ -30,7 +30,21 @@ const getProfile = cathasync(
   },
 );
 
+const manageProfile = cathasync(async (req: Request, res: Response) => {
+  const userId= req.user?.id
+
+  const result = await userServices.manageProfile(userId as string, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Profile updated successfully",
+    data: result,
+  });
+});
+
 export const userController = {
   createUser,
   getProfile,
+  manageProfile
 };
