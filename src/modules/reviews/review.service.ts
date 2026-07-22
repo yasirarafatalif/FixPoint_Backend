@@ -1,5 +1,8 @@
+import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../lib/prisma";
+import AppError from "../../utils/appError";
 import { ReviewPayload } from "./review.interface";
+import { BookingStatus } from "../../../generated/prisma/client";
 
 const createReview = async (payload: ReviewPayload, userId: string) => {
   const { bookingId, rating, comment } = payload;
@@ -12,12 +15,12 @@ const createReview = async (payload: ReviewPayload, userId: string) => {
   });
 
   if (!booking) {
-    throw new Error("Booking not found");
+    throw new AppError(StatusCodes.NOT_FOUND,"Booking not found");
   }
 
-//   if (booking.status !== BookingStatus.COMPLETED) {
-//     throw new Error("You can review only completed bookings.");
-//   }
+  if (booking.status !== BookingStatus.COMPLETED) {
+    throw new Error("You can review only completed bookings.");
+  }
 
   const existingReview = await prisma.review.findUnique({
     where: {
@@ -34,7 +37,6 @@ const createReview = async (payload: ReviewPayload, userId: string) => {
       bookingId,
       customerId: userId,
       technicianId: booking.technicianId,
-      serviceId: booking.serviceId,
       rating,
       comment,
     },

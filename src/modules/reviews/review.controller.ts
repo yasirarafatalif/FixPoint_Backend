@@ -3,12 +3,9 @@ import { cathasync } from "../../utils/cathasycn";
 import { reviewService } from "./review.service";
 import { sendResponse } from "../../utils/senRespone";
 
-const createReview = cathasync(async (req:Request, res: Response) => {
-    const id = req.user?.id
-  const result = await reviewService.createReview(
-    req.body,
-    id as string
-  );
+const createReview = cathasync(async (req: Request, res: Response) => {
+  const id = req.user?.id;
+  const result = await reviewService.createReview(req.body, id as string);
 
   sendResponse(res, {
     success: true,
@@ -18,7 +15,6 @@ const createReview = cathasync(async (req:Request, res: Response) => {
   });
 });
 
-
-export const reviewController ={
-    createReview
-}
+export const reviewController = {
+  createReview,
+};

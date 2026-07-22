@@ -12,6 +12,7 @@ const createBooking = async (payload: BookingsI, userId: string) => {
   const bookingTime = booking.toTimeString().slice(0, 5);
 
   const data = await prisma.$transaction(async (tx) => {
+    
     const findService = await tx.services.findUnique({
       where: {
         id: serviceId,
