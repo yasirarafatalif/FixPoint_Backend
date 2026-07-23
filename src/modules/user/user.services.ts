@@ -14,7 +14,7 @@ const createUser = async (payload: UserCreateI) => {
     },
   });
   if (isUserExist) {
-    throw new Error("User with this email already exists");
+    throw new AppError(StatusCodes.CONFLICT,"User with this email already exists");
   }
 
   const hassPassword = bcrypt.hashSync(
@@ -27,7 +27,7 @@ const createUser = async (payload: UserCreateI) => {
     !role.includes(LogInRole.CUSTOMER) &&
     !role.includes(LogInRole.TECHNICIAN)
   ) {
-    throw new Error("This Role Can't Create By ADMIN");
+    throw new AppError(StatusCodes.BAD_REQUEST,"This Role Can't Create By ADMIN");
   }
 
   const create = await prisma.user.create({
@@ -57,7 +57,7 @@ const getProfile = async (userId: string) => {
     },
   });
   if (!user) {
-    throw new Error("User not found");
+    throw new AppError(StatusCodes.BAD_REQUEST,"User not found");
   }
 
   return user;

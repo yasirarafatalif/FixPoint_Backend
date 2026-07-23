@@ -10,8 +10,6 @@ const createService = async (payload: ServicesI, userId: string) => {
     typeof duration === "number" ? duration : Number(duration);
 
   const data = await prisma.$transaction(async (tx) => {
-
-
     const findTechnician = await tx.technicianProfile.findUnique({
       where: {
         userId,
@@ -19,22 +17,20 @@ const createService = async (payload: ServicesI, userId: string) => {
     });
 
     if (!findTechnician) {
-      throw new AppError(StatusCodes.NOT_FOUND,"Technician profile not found");
+      throw new AppError(StatusCodes.NOT_FOUND, "Technician profile not found");
     }
 
     //find category and add
 
     const finCategory = await tx.category.findUnique({
-      where:{
-        id: categoryId
-      }
-    })
+      where: {
+        id: categoryId,
+      },
+    });
 
     if (!finCategory) {
-      throw new AppError(StatusCodes.NOT_FOUND,"This category not found");
+      throw new AppError(StatusCodes.NOT_FOUND, "This category not found");
     }
-
-
 
     const result = await tx.services.create({
       data: {
@@ -59,16 +55,16 @@ const getSingleService = async (id: string) => {
     },
     include: {
       technician: {
-        omit:{
-          createdAt:true,
-          updatedAt:true,
-          userId:true
-        }
+        omit: {
+          createdAt: true,
+          updatedAt: true,
+          userId: true,
+        },
       },
     },
   });
   if (!result) {
-    throw new AppError(StatusCodes.NOT_FOUND,"Service Not Found");
+    throw new AppError(StatusCodes.NOT_FOUND, "Service Not Found");
   }
   return result;
 };
@@ -115,7 +111,7 @@ const getAllServices = async (query: ServiceFilters) => {
     include: {
       technician: {
         omit: {
-          userId:true,
+          userId: true,
           createdAt: true,
           updatedAt: true,
         },

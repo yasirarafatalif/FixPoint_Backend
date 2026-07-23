@@ -133,7 +133,7 @@ const initPayment = async (payload: CustomerI, userId: string) => {
     }
 
     const response = await sslcz.init(data);
-    //   console.log(response.GatewayPageURL);
+
 
     return {
       paymentUrl: response.GatewayPageURL,

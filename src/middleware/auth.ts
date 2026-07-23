@@ -5,6 +5,8 @@ import config from "../config";
 import { prisma } from "../lib/prisma";
 import { JwtPayload } from "jsonwebtoken";
 import { cathasync } from "../utils/cathasycn";
+import AppError from "../utils/appError";
+import { StatusCodes } from "http-status-codes";
 declare global {
   namespace Express {
     interface Request {
@@ -24,21 +26,24 @@ export const auth = (...roles: Role[]) => {
       : req.headers.authorization
         ? req.headers.authorization.split(" ")[1]
         : req.headers.authorization;
-
     if (!token) {
-      throw new Error("Token is required");
+      throw new AppError(StatusCodes.UNAUTHORIZED, "Token is required");
     }
+
     const validToken = jwtUtils.verifyToken(token, config.jwt_access_secret);
+
     if (!validToken) {
-      throw new Error("Invalid token");
+      throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid token");
     }
+
     if (typeof validToken === "string") {
-      throw new Error("Invalid token");
+      throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid token");
     }
 
     const { id, email, role } = validToken as JwtPayload;
+
     if (roles.length > 0 && !roles.includes(role)) {
-      throw new Error("Unauthorized access");
+      throw new AppError(StatusCodes.FORBIDDEN, "Unauthorized access");
     }
 
     const findUser = await prisma.user.findUnique({
@@ -50,7 +55,7 @@ export const auth = (...roles: Role[]) => {
     });
 
     if (!findUser) {
-      throw new Error("User not found");
+      throw new AppError(StatusCodes.NOT_FOUND, "User not found");
     }
     req.user = {
       id: validToken.id,

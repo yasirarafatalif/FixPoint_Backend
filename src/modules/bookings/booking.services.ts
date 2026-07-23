@@ -6,13 +6,18 @@ import { BookingStatus, WeekDay } from "../../../generated/prisma/client";
 
 const createBooking = async (payload: BookingsI, userId: string) => {
   const { serviceId, customerNote, bookingDate } = payload;
+  if (!serviceId || !customerNote || !bookingDate) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "serviceId, customerNote and bookingDate are required",
+    );
+  }
 
   const booking = new Date(bookingDate);
 
   const bookingTime = booking.toTimeString().slice(0, 5);
 
   const data = await prisma.$transaction(async (tx) => {
-    
     const findService = await tx.services.findUnique({
       where: {
         id: serviceId,
