@@ -34,13 +34,12 @@ Technicians can manage their services, availability, and booking requests while 
 
 | Resource | Link |
 |----------|------|
-| Live Link | [https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME](https://fixit-backend-six.vercel.app) |
+| Live Link | [https://fixit-backend-six.vercel.app](https://fixit-backend-six.vercel.app) |
 | Postman | https://documenter.getpostman.com/view/54723337/2sBY4Mv1mK |
-| Repository | [https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME](https://github.com/yasirarafatalif/FixPoint_Backend.git) |
+| Repository | [https://github.com/yasirarafatalif/FixPoint_Backend.git](https://github.com/yasirarafatalif/FixPoint_Backend.git) |
 | Demo Admin | testadmin@gmail.com |
 | Demo Admin Password | 123123 |
-| Explain Viedo | [[https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME](https://fixit-backend-six.vercel.app)](https://www.loom.com/share/5287730f63084055b22b89fee9634435
-) |
+| Explain Viedo | [Viedo Link](https://www.loom.com/share/5287730f63084055b22b89fee9634435) |
 
 ---
 
