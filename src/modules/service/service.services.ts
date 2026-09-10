@@ -49,6 +49,7 @@ const createService = async (payload: ServicesI, userId: string) => {
 };
 
 const getSingleService = async (id: string) => {
+  console.log(id)
   const result = await prisma.services.findUnique({
     where: {
       id,

@@ -40,6 +40,7 @@ const getSingleTechnician = cathasync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
 
+
     const data = await techniciansServices.getSingleTechnician(id as string);
 
     sendResponse(res, {

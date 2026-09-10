@@ -36,6 +36,7 @@ const getAllServices = cathasync(
 const getSingleService = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
+    console.log("id", id);
     const data = await serviceServices.getSingleService(id as string);
     sendResponse(res, {
       success: true,
