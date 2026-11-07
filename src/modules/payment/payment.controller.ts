@@ -4,6 +4,8 @@ import { cathasync } from "../../utils/cathasycn";
 import { paymentService } from "./payment.service";
 import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
+import config from "../../config";
+import AppError from "../../utils/appError";
 
 const createPayment = cathasync(
   async (req: Request  & { user?: JwtPayload } , res: Response, next: NextFunction) => {
@@ -17,22 +19,43 @@ const createPayment = cathasync(
     });
   },
 );
+// const successPayment = cathasync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const { val_id, tran_id } = req.body;
+//     const data = await paymentService.successPayment(req.body)
+//     sendResponse(res, {
+//       message: "Payment session created successfully",
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       data
+//     });
+//   },
+// );
+
 const successPayment = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { val_id, tran_id } = req.body;
-    const data = await paymentService.successPayment(req.body)
-    sendResponse(res, {
-      message: "Payment session created successfully",
-      success: true,
-      statusCode: StatusCodes.OK,
-      data
-    });
+    const result = await paymentService.successPayment(req.body);
+
+    const frontendUrl = config.ssl_store_frontend.replace(/\/+$/, "");
+
+    return res.redirect(
+      `${frontendUrl}/payment/success?bookingId=${encodeURIComponent(
+        result.bookingId,
+      )}`,
+    );
   },
 );
 
 
 const getMyPayments = cathasync(async (req: Request  & { user?: JwtPayload }, res: Response, next: NextFunction)=> {
   const userId = req.user?.id;
+  console.log("userId", req)
+    if (!userId) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "User authentication required"
+    );
+  }
 
   const result = await paymentService.getMyPayments(userId as string);
 

@@ -7,8 +7,9 @@ const router = Router();
 
 router.post("/create",auth(Role.CUSTOMER), paymentController.createPayment)
 router.post("/confirm",paymentController.successPayment)
-router.post("/",paymentController.getMyPayments)
-router.get("/:id",paymentController.getSinglePayment)
+// router.post("/",paymentController.getMyPayments)
+router.get("/",auth(Role.CUSTOMER),paymentController.getMyPayments)
+router.get("/:id",auth(Role.CUSTOMER),paymentController.getSinglePayment)
 
 
 export const paymentRoute = router;

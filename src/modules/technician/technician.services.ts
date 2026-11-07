@@ -51,9 +51,9 @@ const getSingleTechnician = async (id: string) => {
       createdAt: true,
       updatedAt: true,
     },
-    include:{
-      services: true
-    }
+    include: {
+      services: true,
+    },
   });
 
   if (!technician) {
@@ -248,6 +248,14 @@ const getBookig = async (userId: string) => {
     where: {
       technicianId: findTechnican.id,
     },
+    include: {
+      service: true,
+      customer: {
+        omit: {
+          password: true,
+        },
+      },
+    },
   });
 
   if (findBooking.length === 0) {
@@ -351,7 +359,7 @@ const updateStatus = async (
       },
       data: {
         status: payload.status,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
     });
     return result;

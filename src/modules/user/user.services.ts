@@ -6,37 +6,97 @@ import { LogInRole } from "../../../generated/prisma/client";
 import AppError from "../../utils/appError";
 import { StatusCodes } from "http-status-codes";
 
+// const createUser = async (payload: UserCreateI) => {
+//   const { name, email, password, profileImage, role, phone, address } = payload;
+//   const isUserExist = await prisma.user.findUnique({
+//     where: {
+//       email: email,
+//     },
+//   });
+//   if (isUserExist) {
+//     throw new AppError(StatusCodes.CONFLICT,"User with this email already exists");
+//   }
+
+//   const hassPassword = bcrypt.hashSync(
+//     password,
+//     Number(config.bcrypt_salt_rounds),
+//   );
+//   //   console.log(hassPassword)
+
+//   if (
+//     !role.includes(LogInRole.CUSTOMER) &&
+//     !role.includes(LogInRole.TECHNICIAN)
+//   ) {
+//     throw new AppError(StatusCodes.BAD_REQUEST,"This Role Can't Create By ADMIN");
+//   }
+
+//   const create = await prisma.user.create({
+//     data: {
+//       name,
+//       email,
+//       phone,
+//       profileImage,
+//       password: hassPassword,
+//       role,
+//       address,
+//     },
+//     omit: {
+//       password: true,
+//     },
+//   });
+//   return create;
+// };
+
+
 const createUser = async (payload: UserCreateI) => {
-  const { name, email, password, profileImage, role, phone, address } = payload;
+  const {
+    name,
+    email,
+    password,
+    profileImage,
+    phone,
+    address,
+  } = payload;
+
+  // Password validation
+  if (!password || password.length < 8) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Password must be at least 8 characters long"
+    );
+  }
+
+  // Check existing user
   const isUserExist = await prisma.user.findUnique({
     where: {
       email: email,
     },
   });
+
   if (isUserExist) {
-    throw new AppError(StatusCodes.CONFLICT,"User with this email already exists");
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      "User with this email already exists"
+    );
   }
 
-  const hassPassword = bcrypt.hashSync(
+  // Only CUSTOMER registration is allowed
+  const role = LogInRole.CUSTOMER;
+
+  // Hash password
+  const hashedPassword = await bcrypt.hash(
     password,
-    Number(config.bcrypt_salt_rounds),
+    Number(config.bcrypt_salt_rounds)
   );
-  //   console.log(hassPassword)
 
-  if (
-    !role.includes(LogInRole.CUSTOMER) &&
-    !role.includes(LogInRole.TECHNICIAN)
-  ) {
-    throw new AppError(StatusCodes.BAD_REQUEST,"This Role Can't Create By ADMIN");
-  }
-
+  // Create user
   const create = await prisma.user.create({
     data: {
       name,
       email,
       phone,
       profileImage,
-      password: hassPassword,
+      password: hashedPassword,
       role,
       address,
     },
@@ -44,10 +104,13 @@ const createUser = async (payload: UserCreateI) => {
       password: true,
     },
   });
+
   return create;
 };
 
+
 const getProfile = async (userId: string) => {
+
   const user = await prisma.user.findUnique({
     where: {
       id: userId,

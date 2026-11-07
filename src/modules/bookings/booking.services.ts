@@ -4,8 +4,109 @@ import AppError from "../../utils/appError";
 import { BookingsI } from "./booking.interface";
 import { BookingStatus, WeekDay } from "../../../generated/prisma/client";
 
+// const createBooking = async (payload: BookingsI, userId: string) => {
+//   const { serviceId, customerNote, bookingDate } = payload;
+//   if (!serviceId || !customerNote || !bookingDate) {
+//     throw new AppError(
+//       StatusCodes.BAD_REQUEST,
+//       "serviceId, customerNote and bookingDate are required",
+//     );
+//   }
+
+//   const booking = new Date(bookingDate);
+
+//   const bookingTime = booking.toTimeString().slice(0, 5);
+
+//   const data = await prisma.$transaction(async (tx) => {
+//     const findService = await tx.services.findUnique({
+//       where: {
+//         id: serviceId,
+//       },
+//     });
+
+//     if (!findService) {
+//       throw new AppError(StatusCodes.NOT_FOUND, "This Service Not Found");
+//     }
+//     if (!findService.isActive) {
+//       throw new AppError(
+//         StatusCodes.NOT_FOUND,
+//         "This service is currently unavailable.",
+//       );
+//     }
+
+//     const exitsBooking = await tx.bookings.findFirst({
+//       where: {
+//         customerId: userId,
+//         serviceId: findService.id,
+//       },
+//     });
+//     if (exitsBooking) {
+//       throw new AppError(
+//         StatusCodes.CONFLICT,
+//         "You have already booked this service.",
+//       );
+//     }
+
+//     const availability = await tx.availability.findFirst({
+//       where: {
+//         technicianId: findService.technicianId,
+//       },
+//     });
+
+//     if (!availability) {
+//       throw new AppError(
+//         StatusCodes.BAD_REQUEST,
+//         "The technician is not available on this day.",
+//       );
+//     }
+
+//     if (
+//       bookingTime < availability.startTime ||
+//       bookingTime > availability.endTime
+//     ) {
+//       throw new AppError(
+//         StatusCodes.BAD_REQUEST,
+//         "The selected booking time is outside the technician's working hours.",
+//       );
+//     }
+
+//     const existingSlot = await tx.bookings.findFirst({
+//       where: {
+//         technicianId: findService.technicianId,
+//         bookingDate,
+//         status: {
+//           in: [BookingStatus.REQUESTED, BookingStatus.ACCEPTED],
+//         },
+//       },
+//     });
+
+//     if (existingSlot) {
+//       throw new AppError(
+//         StatusCodes.CONFLICT,
+//         "This time slot is already booked.",
+//       );
+//     }
+
+//     const data = await tx.bookings.create({
+//       data: {
+//         bookingDate,
+//         customerNote,
+//         totalPrice: findService.price,
+//         customerId: userId,
+//         technicianId: findService.technicianId,
+//         serviceId: findService.id,
+//       },
+//     });
+
+//     return data;
+//   });
+
+//   return data;
+// };
+
 const createBooking = async (payload: BookingsI, userId: string) => {
   const { serviceId, customerNote, bookingDate } = payload;
+
   if (!serviceId || !customerNote || !bookingDate) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
@@ -15,18 +116,38 @@ const createBooking = async (payload: BookingsI, userId: string) => {
 
   const booking = new Date(bookingDate);
 
-  const bookingTime = booking.toTimeString().slice(0, 5);
+  if (Number.isNaN(booking.getTime())) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid booking date.");
+  }
+
+  // Bangladesh local date and time
+  const bookingTime = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Dhaka",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(booking);
+
+  const localDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(booking);
+
+  const dayStart = new Date(`${localDate}T00:00:00+06:00`);
+  const nextDay = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
 
   const data = await prisma.$transaction(async (tx) => {
+    // Find service
     const findService = await tx.services.findUnique({
-      where: {
-        id: serviceId,
-      },
+      where: { id: serviceId },
     });
 
     if (!findService) {
       throw new AppError(StatusCodes.NOT_FOUND, "This Service Not Found");
     }
+
     if (!findService.isActive) {
       throw new AppError(
         StatusCodes.NOT_FOUND,
@@ -34,62 +155,65 @@ const createBooking = async (payload: BookingsI, userId: string) => {
       );
     }
 
-    const exitsBooking = await tx.bookings.findFirst({
+    // Prevent duplicate booking for the same customer and service
+    const existingCustomerBooking = await tx.bookings.findFirst({
       where: {
         customerId: userId,
         serviceId: findService.id,
       },
     });
-    if (exitsBooking) {
+
+    if (existingCustomerBooking) {
       throw new AppError(
         StatusCodes.CONFLICT,
         "You have already booked this service.",
       );
     }
 
-    const availability = await tx.availability.findFirst({
+    // Find bookings on the selected Bangladesh date
+    const existingBookings = await tx.bookings.findMany({
       where: {
         technicianId: findService.technicianId,
-      },
-    });
-
-    if (!availability) {
-      throw new AppError(
-        StatusCodes.BAD_REQUEST,
-        "The technician is not available on this day.",
-      );
-    }
-
-    if (
-      bookingTime < availability.startTime ||
-      bookingTime > availability.endTime
-    ) {
-      throw new AppError(
-        StatusCodes.BAD_REQUEST,
-        "The selected booking time is outside the technician's working hours.",
-      );
-    }
-
-    const existingSlot = await tx.bookings.findFirst({
-      where: {
-        technicianId: findService.technicianId,
-        bookingDate,
+        bookingDate: {
+          gte: dayStart,
+          lt: nextDay,
+        },
         status: {
-          in: [BookingStatus.REQUESTED, BookingStatus.ACCEPTED],
+          in: [
+            BookingStatus.REQUESTED,
+            BookingStatus.ACCEPTED,
+            BookingStatus.IN_PROGRESS,
+          ],
         },
       },
+      select: {
+        bookingDate: true,
+      },
     });
 
-    if (existingSlot) {
+    // Compare selected time with occupied times
+    const isSlotBooked = existingBookings.some((item) => {
+      const existingTime = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Dhaka",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }).format(item.bookingDate);
+
+      return existingTime === bookingTime;
+    });
+
+    if (isSlotBooked) {
       throw new AppError(
         StatusCodes.CONFLICT,
-        "This time slot is already booked.",
+        "This time slot is already booked. Please select another time.",
       );
     }
 
-    const data = await tx.bookings.create({
+    // Create booking
+    return tx.bookings.create({
       data: {
-        bookingDate,
+        bookingDate: booking,
         customerNote,
         totalPrice: findService.price,
         customerId: userId,
@@ -97,8 +221,6 @@ const createBooking = async (payload: BookingsI, userId: string) => {
         serviceId: findService.id,
       },
     });
-
-    return data;
   });
 
   return data;

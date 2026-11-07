@@ -20,6 +20,7 @@ const createUser = cathasync(
 const getProfile = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id;
+
     const user = await userServices.getProfile(userId as string);
     sendResponse(res, {
       success: true,

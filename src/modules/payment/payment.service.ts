@@ -134,7 +134,6 @@ const initPayment = async (payload: CustomerI, userId: string) => {
 
     const response = await sslcz.init(data);
 
-
     return {
       paymentUrl: response.GatewayPageURL,
     };
@@ -154,16 +153,13 @@ const successPayment = async (payload: any) => {
         store_passwd: config.ssl_store_password,
         format: "json",
       },
-    }
+    },
   );
 
   const verifyData = verifyResponse.data;
 
   if (verifyData.status !== "VALID") {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      "Payment validation failed."
-    );
+    throw new AppError(StatusCodes.BAD_REQUEST, "Payment validation failed.");
   }
 
   const payment = await prisma.payment.findUnique({
@@ -173,10 +169,7 @@ const successPayment = async (payload: any) => {
   });
 
   if (!payment) {
-    throw new AppError(
-      StatusCodes.NOT_FOUND,
-      "Payment not found."
-    );
+    throw new AppError(StatusCodes.NOT_FOUND, "Payment not found.");
   }
 
   await prisma.$transaction([
@@ -202,7 +195,7 @@ const successPayment = async (payload: any) => {
       },
       data: {
         paymentStatus: PaymentStatus.PAID,
-        status: BookingStatus.IN_PROGRESS
+        status: BookingStatus.IN_PROGRESS,
       },
     }),
   ]);
@@ -210,19 +203,51 @@ const successPayment = async (payload: any) => {
   return {
     success: true,
     message: "Payment verified successfully.",
+    bookingId: payment.bookingId,
   };
 };
 
+// const getMyPayments = async (userId: string) => {
+//   const payments = await prisma.payment.findMany({
+//     where: {
+//       booking: {
+//         customerId: userId,
+//       },
+//     },
+//     omit: {
+//       createdAt: true,
+//       updatedAt: true,
+//     },
+//     orderBy: {
+//       createdAt: "desc",
+//     },
+//   });
+
+//   return payments;
+// };
+
+
 const getMyPayments = async (userId: string) => {
+  // console.log(userId)
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
   const payments = await prisma.payment.findMany({
     where: {
       booking: {
         customerId: userId,
       },
     },
-    omit: {
-      createdAt: true,
-      updatedAt: true,
+    select: {
+      id: true,
+      amount: true,
+      status: true,
+      transactionId: true,
+      gateway: true,
+      paymentMethod: true,
+      paidAt: true,
+      bookingId: true,
     },
     orderBy: {
       createdAt: "desc",

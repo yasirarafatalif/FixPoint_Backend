@@ -6,7 +6,9 @@ import { cathasync } from "../../utils/cathasycn";
 
 const createCategory = cathasync(
   async (req: Request, res: Response) => {
+
     const data = await adminServices.createCategory(req.body);
+    console.log(data)
 
     sendResponse(res, {
       success: true,
@@ -47,6 +49,7 @@ const getAllBookings = cathasync(
 const updateUserStatus = cathasync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+    console.log(id)
 
     const data = await adminServices.updateUserStatus(id as string, req.body);
 
