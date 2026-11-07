@@ -9,6 +9,7 @@ router.post(
   auth(Role.CUSTOMER),
   reviewController.createReview
 );
+router.get("/", auth(Role.CUSTOMER), reviewController.getAllReviews);
 
 
 export const reviewRoute = router;

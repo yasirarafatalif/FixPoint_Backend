@@ -15,7 +15,7 @@ const createReview = async (payload: ReviewPayload, userId: string) => {
   });
 
   if (!booking) {
-    throw new AppError(StatusCodes.NOT_FOUND,"Booking not found");
+    throw new AppError(StatusCodes.NOT_FOUND, "Booking not found");
   }
 
   if (booking.status !== BookingStatus.COMPLETED) {
@@ -45,7 +45,27 @@ const createReview = async (payload: ReviewPayload, userId: string) => {
   return review;
 };
 
+const getAllReviews = async (userId: string) => {
+  try {
+    const reviews = await prisma.review.findMany({
+      where: {
+        customerId: userId,
+      },
+      include: {
+        booking: true,
+      },
+    });
+    console.log("services", reviews);
+    return reviews;
+  } catch (error) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Failed to retrieve reviews",
+    );
+  }
+};
 
-export const reviewService ={
-    createReview
-}
+export const reviewService = {
+  createReview,
+  getAllReviews,
+};
