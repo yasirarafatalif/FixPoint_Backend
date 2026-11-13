@@ -228,7 +228,6 @@ const successPayment = async (payload: any) => {
 
 
 const getMyPayments = async (userId: string) => {
-  // console.log(userId)
   if (!userId) {
     throw new Error("User ID is required");
   }

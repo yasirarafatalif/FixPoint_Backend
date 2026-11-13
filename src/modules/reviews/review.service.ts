@@ -55,7 +55,6 @@ const getAllReviews = async (userId: string) => {
         booking: true,
       },
     });
-    console.log("services", reviews);
     return reviews;
   } catch (error) {
     throw new AppError(

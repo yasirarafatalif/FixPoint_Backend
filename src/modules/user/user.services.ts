@@ -21,7 +21,7 @@ import { StatusCodes } from "http-status-codes";
 //     password,
 //     Number(config.bcrypt_salt_rounds),
 //   );
-//   //   console.log(hassPassword)
+//   
 
 //   if (
 //     !role.includes(LogInRole.CUSTOMER) &&
@@ -58,7 +58,6 @@ const createUser = async (payload: UserCreateI) => {
     address,
     role
   } = payload;
-  console.log(payload)
 
   // Password validation
   if (!password || password.length < 8) {

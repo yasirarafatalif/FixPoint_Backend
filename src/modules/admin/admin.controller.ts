@@ -47,8 +47,6 @@ const getAllBookings = cathasync(
 const updateUserStatus = cathasync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    console.log(id)
-
     const data = await adminServices.updateUserStatus(id as string, req.body);
 
     sendResponse(res, {

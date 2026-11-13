@@ -18,7 +18,6 @@ const createReview = cathasync(async (req: Request, res: Response) => {
 const getAllReviews = cathasync(async (req: Request, res: Response) => {
   const id = req.user?.id;
   const result = await reviewService.getAllReviews(id as string);
-  console.log("controller result", result)
   sendResponse(res, {
     success: true,
     statusCode: 200,
