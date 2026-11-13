@@ -288,9 +288,118 @@ const getSinglePayment = async (paymentId: string, userId: string) => {
   return payment;
 };
 
+const cancelPayment = async (payload: any) => {
+  const { tran_id } = payload;
+
+  if (!tran_id) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Transaction ID is required.",
+    );
+  }
+
+  const payment = await prisma.payment.findUnique({
+    where: {
+      transactionId: tran_id,
+    },
+  });
+
+  if (!payment) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Payment not found.");
+  }
+
+  if (payment.status === PaymentStatus.PAID) {
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      "This payment has already been completed.",
+    );
+  }
+
+  await prisma.$transaction([
+    prisma.payment.update({
+      where: {
+        transactionId: tran_id,
+      },
+      data: {
+        status: PaymentStatus.FAILED,
+      },
+    }),
+
+    prisma.bookings.update({
+      where: {
+        id: payment.bookingId,
+      },
+      data: {
+        paymentStatus: PaymentStatus.FAILED,
+      },
+    }),
+  ]);
+
+  return {
+    success: true,
+    message: "Payment cancelled successfully.",
+    bookingId: payment.bookingId,
+  };
+};
+const failPayment = async (payload: any) => {
+  const { tran_id } = payload;
+
+  if (!tran_id) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Transaction ID is required.",
+    );
+  }
+
+  const payment = await prisma.payment.findUnique({
+    where: {
+      transactionId: tran_id,
+    },
+  });
+
+  if (!payment) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Payment not found.");
+  }
+
+  if (payment.status === PaymentStatus.PAID) {
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      "This payment has already been completed.",
+    );
+  }
+
+  await prisma.$transaction([
+    prisma.payment.update({
+      where: {
+        transactionId: tran_id,
+      },
+      data: {
+        status: PaymentStatus.FAILED,
+      },
+    }),
+
+    prisma.bookings.update({
+      where: {
+        id: payment.bookingId,
+      },
+      data: {
+        paymentStatus: PaymentStatus.FAILED,
+      },
+    }),
+  ]);
+
+  return {
+    success: true,
+    message: "Payment failed successfully.",
+    bookingId: payment.bookingId,
+  };
+};
+
 export const paymentService = {
   initPayment,
   successPayment,
   getMyPayments,
   getSinglePayment,
+  cancelPayment,
+  failPayment
 };

@@ -54,6 +54,7 @@ export const auth = (...roles: Role[]) => {
       },
     });
 
+
     if (!findUser) {
       throw new AppError(StatusCodes.NOT_FOUND, "User not found");
     }

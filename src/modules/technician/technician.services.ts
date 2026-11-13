@@ -366,6 +366,24 @@ const updateStatus = async (
   });
   return data;
 };
+const getAllServices = async (id: string) => {
+
+  const technician = await prisma.technicianProfile.findUnique({
+    where: {
+      userId: id,
+    },
+  });
+  if (!technician) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Technician not found");
+  }
+
+  const services = await prisma.services.findMany({
+    where: {
+      technicianId: technician.id,
+    },
+  });
+  return services;
+};
 export const techniciansServices = {
   createTechnician,
   getAllTechnicians,
@@ -375,4 +393,5 @@ export const techniciansServices = {
   updateAvailability,
   updateStatus,
   getSingleTechnician,
+  getAllServices
 };

@@ -56,7 +56,9 @@ const createUser = async (payload: UserCreateI) => {
     profileImage,
     phone,
     address,
+    role
   } = payload;
+  console.log(payload)
 
   // Password validation
   if (!password || password.length < 8) {
@@ -81,7 +83,7 @@ const createUser = async (payload: UserCreateI) => {
   }
 
   // Only CUSTOMER registration is allowed
-  const role = LogInRole.CUSTOMER;
+  // const role = LogInRole.CUSTOMER;
 
   // Hash password
   const hashedPassword = await bcrypt.hash(

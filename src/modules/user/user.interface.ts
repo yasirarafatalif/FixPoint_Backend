@@ -3,10 +3,10 @@ export interface UserCreateI{
     name : string,
     email: string,
     password: string,
-    role: LogInRole,
+    role?: LogInRole,
     profileImage?: string
     phone?: string,
-    address?: string
+    address?: string,
 }
 
 export interface IManageProfile {

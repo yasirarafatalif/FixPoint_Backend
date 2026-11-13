@@ -160,13 +160,20 @@ const createBooking = async (payload: BookingsI, userId: string) => {
       where: {
         customerId: userId,
         serviceId: findService.id,
+        status: {
+          in: [
+            BookingStatus.REQUESTED,
+            BookingStatus.ACCEPTED,
+            BookingStatus.IN_PROGRESS,
+          ],
+        },
       },
     });
 
     if (existingCustomerBooking) {
       throw new AppError(
         StatusCodes.CONFLICT,
-        "You have already booked this service.",
+        "You already have an active booking for this service.",
       );
     }
 

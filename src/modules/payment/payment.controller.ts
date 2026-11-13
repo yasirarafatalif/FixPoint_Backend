@@ -1,3 +1,4 @@
+
 import { sendResponse } from "./../../utils/senRespone";
 import { NextFunction, Request, Response } from "express";
 import { cathasync } from "../../utils/cathasycn";
@@ -7,38 +8,58 @@ import { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
 import AppError from "../../utils/appError";
 
+type AuthRequest = Request & {
+  user?: JwtPayload;
+};
+
+const getFrontendUrl = () => {
+  const frontendUrl = config.ssl_store_frontend?.replace(/\/+$/, "");
+
+  if (!frontendUrl) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Frontend URL is not configured",
+    );
+  }
+
+  return frontendUrl;
+};
+
+// Create Payment
 const createPayment = cathasync(
-  async (req: Request  & { user?: JwtPayload } , res: Response, next: NextFunction) => {
-    const userId= req.user?.id;
-    const data = await paymentService.initPayment(req.body,userId as string);
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new AppError(
+        StatusCodes.UNAUTHORIZED,
+        "User authentication required",
+      );
+    }
+
+    const data = await paymentService.initPayment(
+      req.body,
+      userId as string,
+    );
+
     sendResponse(res, {
-      message: "Payment Success",
+      message: "Payment session created successfully",
       success: true,
       statusCode: StatusCodes.OK,
       data,
     });
   },
 );
-// const successPayment = cathasync(
-//   async (req: Request, res: Response, next: NextFunction) => {
-//     const { val_id, tran_id } = req.body;
-//     const data = await paymentService.successPayment(req.body)
-//     sendResponse(res, {
-//       message: "Payment session created successfully",
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       data
-//     });
-//   },
-// );
 
+// Payment Success
 const successPayment = cathasync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const result = await paymentService.successPayment(req.body);
 
-    const frontendUrl = config.ssl_store_frontend.replace(/\/+$/, "");
+    const frontendUrl = getFrontendUrl();
 
     return res.redirect(
+      303,
       `${frontendUrl}/payment/success?bookingId=${encodeURIComponent(
         result.bookingId,
       )}`,
@@ -46,46 +67,93 @@ const successPayment = cathasync(
   },
 );
 
+// Payment Fail
+const failPayment = cathasync(
+  async (req: Request, res: Response) => {
+    // Service should update the payment status as FAILED.
+    // Implement failPayment in payment.service.ts if it does not exist.
+    await paymentService.failPayment(req.body);
 
-const getMyPayments = cathasync(async (req: Request  & { user?: JwtPayload }, res: Response, next: NextFunction)=> {
-  const userId = req.user?.id;
-  console.log("userId", req)
-    if (!userId) {
-    throw new AppError(
-      StatusCodes.UNAUTHORIZED,
-      "User authentication required"
+    const frontendUrl = getFrontendUrl();
+
+    return res.redirect(
+      303,
+      `${frontendUrl}/payment/cancel?status=failed`,
     );
-  }
+  },
+);
 
-  const result = await paymentService.getMyPayments(userId as string);
+// Payment Cancel
+const cancelPayment = cathasync(
+  async (req: Request, res: Response) => {
+    // Service should update the payment status as CANCELLED.
+    // Implement cancelPayment in payment.service.ts if it does not exist.
+    await paymentService.cancelPayment(req.body);
 
-  sendResponse(res, {
-    success: true,
-    statusCode: 200,
-    message: "Payment history retrieved successfully",
-    data: result,
-  });
-});
+    const frontendUrl = getFrontendUrl();
 
+    return res.redirect(
+      303,
+      `${frontendUrl}/payment/cancel?status=cancelled`,
+    );
+  },
+);
 
-const getSinglePayment = cathasync(async (req: Request  & { user?: JwtPayload }, res: Response, next: NextFunction) => {
-  const { id } = req.params;
-  const userId = req.user?.id;
-  console.log(id)
+// Get My Payments
+const getMyPayments = cathasync(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
 
-  const result = await paymentService.getSinglePayment(id as string, userId as string);
+    if (!userId) {
+      throw new AppError(
+        StatusCodes.UNAUTHORIZED,
+        "User authentication required",
+      );
+    }
 
-  sendResponse(res, {
-    success: true,
-    statusCode: 200,
-    message: "Payment details retrieved successfully",
-    data: result,
-  });
-});
+    const result = await paymentService.getMyPayments(userId as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Payment history retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+// Get Single Payment
+const getSinglePayment = cathasync(
+  async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new AppError(
+        StatusCodes.UNAUTHORIZED,
+        "User authentication required",
+      );
+    }
+
+    const result = await paymentService.getSinglePayment(
+      id as string,
+      userId as string,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Payment details retrieved successfully",
+      data: result,
+    });
+  },
+);
 
 export const paymentController = {
   createPayment,
   successPayment,
+  failPayment,
+  cancelPayment,
   getMyPayments,
-  getSinglePayment
+  getSinglePayment,
 };

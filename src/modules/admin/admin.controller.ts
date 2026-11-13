@@ -8,8 +8,6 @@ const createCategory = cathasync(
   async (req: Request, res: Response) => {
 
     const data = await adminServices.createCategory(req.body);
-    console.log(data)
-
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,

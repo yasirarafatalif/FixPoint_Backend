@@ -11,5 +11,9 @@ router.post("/confirm",paymentController.successPayment)
 router.get("/",auth(Role.CUSTOMER),paymentController.getMyPayments)
 router.get("/:id",auth(Role.CUSTOMER),paymentController.getSinglePayment)
 
+router.post("/success", paymentController.successPayment);
+router.post("/fail", paymentController.failPayment);
+router.post("/cancel", paymentController.cancelPayment);
+
 
 export const paymentRoute = router;

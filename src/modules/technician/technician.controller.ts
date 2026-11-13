@@ -85,6 +85,7 @@ const updateProfile= cathasync(
 const getBooking= cathasync(
   async (req: Request , res: Response, next:NextFunction)=>{
     const userId = req.user?.id;
+    console.log("technicinas controller", userId)
     const data = await techniciansServices.getBookig(userId as string);
     sendResponse(res, {
       success: true,
@@ -135,6 +136,19 @@ const updateBookingStatus = cathasync(
   }
 );
 
+const getTechnicianServices = cathasync(
+  async (req: Request & { user?: JwtPayload}, res: Response) => {
+    const userId = req.user?.id;
+    console.log("userId,", userId)
+    const data = await techniciansServices.getAllServices(userId as string);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Technician Retrieved Successfully",
+      data,
+    });
+  });
+
 
 export const techniciansController = {
   createTechnician,
@@ -144,6 +158,7 @@ export const techniciansController = {
   getBooking,
   updateAvailability,
   updateBookingStatus,
-  getSingleTechnician
+  getSingleTechnician,
+  getTechnicianServices
 
 };
