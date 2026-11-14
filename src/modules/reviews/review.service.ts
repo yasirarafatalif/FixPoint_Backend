@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../lib/prisma";
-import AppError from "../../utils/appError";
+import AppError from "../../utils/AppError";
 import { ReviewPayload } from "./review.interface";
 import { BookingStatus } from "../../../generated/prisma/client";
 

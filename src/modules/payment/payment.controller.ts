@@ -6,7 +6,7 @@ import { paymentService } from "./payment.service";
 import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
-import AppError from "../../utils/appError";
+import AppError from "../../utils/AppError";
 
 type AuthRequest = Request & {
   user?: JwtPayload;

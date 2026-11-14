@@ -9,7 +9,7 @@ import {
   PaymentStatus,
 } from "../../../generated/prisma/client";
 import axios from "axios";
-import AppError from "../../utils/appError";
+import AppError from "../../utils/AppError";
 import { StatusCodes } from "http-status-codes";
 
 const store_id = config.ssl_store_id!;

@@ -7,7 +7,7 @@ import {
   UpdateAvailabilityI,
   UpdateStatus,
 } from "./technician.interface";
-import AppError from "../../utils/appError";
+import AppError from "../../utils/AppError";
 import { StatusCodes } from "http-status-codes";
 
 const createTechnician = async (user: JwtPayload, payload: TechniciansI) => {

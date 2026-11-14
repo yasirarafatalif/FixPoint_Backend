@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import { IManageProfile, UserCreateI } from "./user.interface";
 import { LogInRole } from "../../../generated/prisma/client";
-import AppError from "../../utils/appError";
+import AppError from "../../utils/AppError";
 import { StatusCodes } from "http-status-codes";
 
 // const createUser = async (payload: UserCreateI) => {

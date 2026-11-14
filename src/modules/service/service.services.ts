@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../lib/prisma";
-import AppError from "../../utils/appError";
+import AppError from "../../utils/AppError";
 import { ServiceFilters, ServicesI } from "./service.interface";
 
 const createService = async (payload: ServicesI, userId: string) => {

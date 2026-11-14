@@ -5,7 +5,7 @@ import config from "../config";
 import { prisma } from "../lib/prisma";
 import { JwtPayload } from "jsonwebtoken";
 import { cathasync } from "../utils/cathasycn";
-import AppError from "../utils/appError";
+import AppError from "../utils/AppError";
 import { StatusCodes } from "http-status-codes";
 declare global {
   namespace Express {

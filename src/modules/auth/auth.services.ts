@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { UserCreateI, UserLogin } from "./auth.interface";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { jwtUtils } from "../../utils/jwt";
-import AppError from "../../utils/appError";
+import AppError from "../../utils/AppError";
 import { StatusCodes } from "http-status-codes";
 
 const loginIntodb = async (payload: UserLogin) => {
