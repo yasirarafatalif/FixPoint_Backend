@@ -1,4 +1,4 @@
-// import { SSLCommerzPayment } from 'sslcommerz-lts';
+// @ts-ignore
 import SSLCommerzPayment from "sslcommerz-lts";
 import config from "../../config";
 import { CustomerI } from "./payment.interface";
